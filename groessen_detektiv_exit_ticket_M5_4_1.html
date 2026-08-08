@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Größen-Detektiv – Exit Ticket M5 4.1</title>
+<style>
+  :root { --bg:#f5f7fb; --card:#fff; --ink:#172033; --muted:#667085; --accent:#4f46e5; --ok:#15803d; --bad:#b91c1c; --line:#d9deea; }
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:900px;margin:auto;padding:18px}.top{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 5px 20px #00000008}
+  h1{margin:0 0 6px;font-size:clamp(1.5rem,4vw,2.2rem)} h2{margin-top:0}.sub{color:var(--muted)}
+  .bar{height:10px;background:#e7eaf2;border-radius:99px;overflow:hidden;margin:15px 0}.fill{height:100%;width:0;background:var(--accent);transition:.25s}
+  .meta{display:flex;gap:10px;flex-wrap:wrap}.pill{padding:7px 10px;border-radius:99px;background:#eef0ff;font-size:.9rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:16px}
+  .level{font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-size:.82rem}
+  .q{font-size:1.2rem;line-height:1.5;margin:10px 0 18px}.choices{display:grid;gap:10px}.choice{border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px;text-align:left;font-size:1rem;cursor:pointer}.choice:hover{border-color:var(--accent);background:#fafaff}.choice.selected{border:2px solid var(--accent)}
+  input[type=number], input[type=text]{width:100%;max-width:300px;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:1rem}
+  .btn{margin-top:18px;border:0;border-radius:12px;padding:12px 17px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}.btn:disabled{opacity:.45;cursor:not-allowed}
+  .feedback{margin-top:15px;padding:12px;border-radius:12px;display:none}.feedback.ok{display:block;background:#ecfdf3;color:#166534}.feedback.bad{display:block;background:#fef2f2;color:#991b1b}
+  .hidden{display:none}.summary{display:grid;gap:12px}.result{border:1px solid var(--line);border-radius:12px;padding:13px}.result strong{display:block}.small{font-size:.9rem;color:var(--muted)}
+  .code{font-size:2rem;font-weight:800;letter-spacing:.15em;text-align:center;padding:14px;background:#f3f4ff;border-radius:14px;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🕵️ Größen-Detektiv</h1>
+    <div class="sub">Exit Ticket zu M5 4.1 „Geld, Länge, Masse und Zeit“</div>
+    <div class="bar"><div id="fill" class="fill"></div></div>
+    <div class="meta"><span class="pill" id="progress">Fall 1 von 10</span><span class="pill" id="score">0 Punkte</span></div>
+  </div>
+
+  <section id="game" class="card"></section>
+  <section id="end" class="card hidden"></section>
+</div>
+
+<script>
+const tasks = [
+ {lvl:"AFB I · Spuren lesen", comp:"Umrechnen", q:"Im Detektivkoffer liegen 3,5 m Schnur. Wie viele Zentimeter sind das?",
+  type:"choice", opts:["35 cm","350 cm","3 500 cm","0,35 cm"], ans:1, why:"1 m = 100 cm. Also 3,5 m = 350 cm."},
+ {lvl:"AFB I · Spuren lesen", comp:"Umrechnen", q:"Eine Flasche enthält 750 ml. Welche Angabe ist gleich groß?",
+  type:"choice", opts:["7,5 l","0,75 l","75 l","0,075 l"], ans:1, why:"1 l = 1 000 ml. Daher 750 ml = 0,75 l."},
+ {lvl:"AFB I · Spuren lesen", comp:"Umrechnen", q:"Der Fall beginnt um 14:35 Uhr und endet um 15:10 Uhr. Wie lange dauert er?",
+  type:"choice", opts:["25 min","30 min","35 min","45 min"], ans:2, why:"Von 14:35 bis 15:00 sind 25 min, plus 10 min = 35 min."},
+ {lvl:"AFB I · Spuren lesen", comp:"Rechnen mit Größen", q:"Im Supermarkt kosten zwei Dinge 2,35 € und 1,80 €. Wie viel musst du zusammen bezahlen?",
+  type:"choice", opts:["3,15 €","4,05 €","4,15 €","4,25 €"], ans:1, why:"2,35 € + 1,80 € = 4,15 €. Achtung: Die richtige Antwort ist 4,15 €."},
+ {lvl:"AFB II · Fall kombinieren", comp:"Rechnen mit Größen", q:"Für eine Wanderung sind 2 km 350 m geplant. Danach kommen noch 750 m dazu. Wie lang ist die Strecke insgesamt?",
+  type:"choice", opts:["2 km 600 m","3 km 100 m","3 km 350 m","10 km 100 m"], ans:1, why:"350 m + 750 m = 1 100 m = 1 km 100 m. Also insgesamt 3 km 100 m."},
+ {lvl:"AFB II · Fall kombinieren", comp:"Schätzen & Plausibilität", q:"Welche Schätzung ist für die Masse eines gefüllten Schulranzens am plausibelsten?",
+  type:"choice", opts:["80 g","800 g","8 kg","80 kg"], ans:2, why:"Ein gefüllter Schulranzen wiegt typischerweise einige Kilogramm, nicht Gramm und nicht 80 kg."},
+ {lvl:"AFB II · Fall kombinieren", comp:"Schlussrechnung", q:"4 Eintrittskarten kosten zusammen 28 €. Wie viel kosten 7 Karten, wenn jede Karte gleich viel kostet?",
+  type:"choice", opts:["35 €","42 €","49 €","56 €"], ans:2, why:"28 € : 4 = 7 € pro Karte; 7 · 7 € = 49 €."},
+ {lvl:"AFB II · Fall kombinieren", comp:"Zeit", q:"Ein Zug fährt um 08:47 Uhr los. Die Fahrt dauert 1 h 35 min. Wann kommt er an?",
+  type:"choice", opts:["09:52 Uhr","10:12 Uhr","10:22 Uhr","10:32 Uhr"], ans:1, why:"08:47 + 1 h = 09:47; +35 min = 10:22. Achtung: Die korrekte Antwort ist 10:22 Uhr."},
+ {lvl:"AFB III · Meisterfall", comp:"Plausibilität & Begründen", q:"Lena behauptet: „2,4 kg sind weniger als 2 000 g, weil 2,4 kleiner als 2 000 ist.“ Was ist richtig?",
+  type:"choice", opts:["Lena hat recht.","Lena hat unrecht: 2,4 kg = 2 400 g.","Lena hat unrecht: 2,4 kg = 240 g.","Man kann die Größen nicht vergleichen."], ans:1, why:"Vor dem Vergleichen müssen beide Angaben dieselbe Einheit haben: 2,4 kg = 2 400 g."},
+ {lvl:"AFB III · Meisterfall", comp:"Maßstab & Modellieren", q:"Auf einem Plan ist ein Weg 6 cm lang. Der Maßstab ist 1 : 100. Wie lang ist der Weg in Wirklichkeit?",
+  type:"choice", opts:["6 cm","60 cm","6 m","60 m"], ans:2, why:"1 cm im Plan entspricht 100 cm in Wirklichkeit. 6 · 100 cm = 600 cm = 6 m."}
+];
+
+let i=0, score=0, answered=[], selected=null;
+
+function render(){
+ const t=tasks[i];
+ document.getElementById("progress").textContent=`Fall ${i+1} von ${tasks.length}`;
+ document.getElementById("score").textContent=`${score} Punkte`;
+ document.getElementById("fill").style.width=(i/tasks.length*100)+"%";
+ document.getElementById("game").innerHTML=`
+   <div class="level">${t.lvl}</div>
+   <div class="small">${t.comp}</div>
+   <div class="q">${t.q}</div>
+   <div class="choices">${t.opts.map((o,n)=>`<button class="choice" onclick="select(${n})">${String.fromCharCode(65+n)}) ${o}</button>`).join("")}</div>
+   <button id="check" class="btn" disabled onclick="check()">Antwort prüfen</button>
+   <div id="fb" class="feedback"></div>`;
+ selected=null;
+}
+function select(n){
+ selected=n;
+ document.querySelectorAll(".choice").forEach((b,k)=>b.classList.toggle("selected",k===n));
+ document.getElementById("check").disabled=false;
+}
+function check(){
+ const t=tasks[i], ok=selected===t.ans;
+ if(ok) score++;
+ answered.push({comp:t.comp, lvl:t.lvl, ok});
+ const fb=document.getElementById("fb");
+ fb.className="feedback "+(ok?"ok":"bad");
+ fb.innerHTML=(ok?"✅ Richtig! ":"❌ Noch einmal anschauen. ")+t.why;
+ document.getElementById("check").textContent=i===tasks.length-1?"Auswertung anzeigen":"Nächster Fall →";
+ document.getElementById("check").onclick=()=>{ if(i===tasks.length-1) finish(); else {i++;render();} };
+ document.getElementById("check").disabled=false;
+}
+function finish(){
+ document.getElementById("fill").style.width="100%";
+ document.getElementById("game").classList.add("hidden");
+ const groups={};
+ answered.forEach(x=>{if(!groups[x.comp])groups[x.comp]=[];groups[x.comp].push(x.ok)});
+ let html=`<h2>🔎 Fall gelöst!</h2><p>Du hast <strong>${score} von ${tasks.length}</strong> Fällen richtig gelöst.</p>`;
+ let strengths=[], practice=[];
+ Object.entries(groups).forEach(([c,a])=>{
+   const n=a.filter(Boolean).length;
+   const ok=n===a.length;
+   (ok?strengths:practice).push(c);
+   html+=`<div class="result"><strong>${ok?"✅":"🎯"} ${c}</strong><span>${n} von ${a.length} richtig – ${ok?"sitzt sicher.":"hier lohnt sich noch eine kurze Übung."}</span></div>`;
+ });
+ html+=`<h3>Dein Detektiv-Feedback</h3>`;
+ if(strengths.length) html+=`<p><strong>Das sitzt schon gut:</strong> ${strengths.join(", ")}.</p>`;
+ if(practice.length) html+=`<p><strong>Üben lohnt sich noch bei:</strong> ${practice.join(", ")}. Wiederhole besonders das Umwandeln in eine gemeinsame Einheit und prüfe Ergebnisse mit einer Schätzung.</p>`;
+ else html+=`<p>🌟 Stark! Du hast alle Kompetenzbereiche sicher gezeigt.</p>`;
+ html+=`<p class="small">Die Auswertung ist kompetenzbezogen und wird nur für diese Bearbeitung im Browser gehalten.</p>`;
+ document.getElementById("end").innerHTML=html;
+ document.getElementById("end").classList.remove("hidden");
+}
+render();
+</script>
+</body>
+</html>
